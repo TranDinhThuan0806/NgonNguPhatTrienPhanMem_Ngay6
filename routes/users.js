@@ -1,11 +1,13 @@
 var express = require("express");
 var router = express.Router();
-let bcrypt = require('bcrypt')
-let { userCreateValidator, handleResultValidator } = require('../utils/validatorHandler')
 
-// STRONGPASSWORD
+let { userCreateValidator
+    , userUpdateValidator
+    , handleResultValidator } = require('../utils/validatorHandler')
 
-let userModel = require("../schemas/users");
+
+
+let userController = require("../controllers/users");
 
 
 router.get("/", async function (req, res, next) {
@@ -32,20 +34,14 @@ router.get("/:id", async function (req, res, next) {
     }
 });
 
-router.post("/", userCreateValidator,handleResultValidator,
+router.post("/", userCreateValidator, handleResultValidator,
     async function (req, res, next) {
         try {
-            let newItem = new userModel({
-                username: req.body.username,
-                password: req.body.password,
-                email: req.body.email,
-                fullName: req.body.fullName,
-                avatarUrl: req.body.avatarUrl,
-                status: req.body.status,
-                role: req.body.role,
-                loginCount: req.body.loginCount
-            });
-
+            let newItem = userController.CreateAnUser(
+                req.body.username,
+                req.body.password, req.body.email, req.body.fullName,
+                req.body.avatarUrl, req.body.role, req.body.status, req.body.loginCount
+            )
             await newItem.save();
 
             // populate cho đẹp
@@ -57,7 +53,7 @@ router.post("/", userCreateValidator,handleResultValidator,
         }
     });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", userUpdateValidator, handleResultValidator, async function (req, res, next) {
     try {
         let id = req.params.id;
         //c1
